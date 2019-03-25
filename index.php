@@ -79,8 +79,10 @@
 				</div>
 			</div>
 			<?php
-				session_start();				
-				//session_destroy();
+				// Inicia sessão do navegador
+				session_start(); 
+
+				// Verifica se foi passado os valores via GET
 				$aluno = isset($_GET['nome_aluno']) ? $_GET['nome_aluno'] : NULL;
 				$p1 = isset($_GET['p1']) ? $_GET['p1'] : NULL;
 				$ma1 = isset($_GET['ma1']) ? $_GET['ma1'] : NULL;
@@ -89,29 +91,34 @@
 				$ma2 = isset($_GET['ma2']) ? $_GET['ma2'] : NULL;
 				$mb2 = isset($_GET['mb2']) ? $_GET['mb2'] : NULL;
 				$faltas = isset($_GET['faltas']) ? $_GET['faltas'] : NULL;
+
+				// Cria array para armazenar os registros inseridos
 				$alunos = array();
 
+				// Verifica se existe a variável de sessão 'bd'
 				if (isset($_SESSION['bd'])) {					
-					$alunos = $_SESSION['bd'];
+					$alunos = $_SESSION['bd']; // Carrega array 'alunos' com conteúdo da 'bd'
 				}
 
+				// Verifica se existe a variálvel de sessão 'remove'
 				if (isset($_GET['remove'])) {
-					$aux = array();
-					foreach ($alunos as $key => $value) {						
-						if ($key != $_GET['remove']) {
-							array_push($aux, $alunos[$key]);
+					$aux = array(); // Cria array 'aux' auxiliar a remoção
+					foreach ($alunos as $key => $value) { // Passa por todos os indices do array				
+						if ($key != $_GET['remove']) { // Ignora o indice passado pela variável 'remove'
+							array_push($aux, $alunos[$key]); // Inseri o conteúdo do array 'alunos' no array 'aux'
 						}
 					}
-					$alunos = $aux;
-					header("Location: index.php");
+					$alunos = $aux;// Carrega o array 'alunos'
+					header("Location: index.php"); // Carrega página index.php
 				}
 
-				if ($aluno != NULL) {					
+				if ($aluno != NULL) { // Verifica se a variável 'aluno' tem conteúdo
+					// Função para calcular a % de falta - retorna um inteiro
 					function calculaFalta($faltas) {
 						$result = ($faltas*100)/79;					
 						return round(100 - $result, 0);
 					}				
-
+					// Função para calcular a médio - retorna um array com a nota 1, nota 2 e média
 					function calculaMedia($p1, $ma1, $mb1, $p2, $ma2, $mb2){
 
 						$soma1 = (($p1*0.70) + ($ma1*0.20) + ($mb1*0.10));
@@ -125,7 +132,7 @@
 							'media' => (float)substr($mediaFinal, 0, 3)
 						);
 					}
-
+					// Função para validar o status do aluno - retorna um array com status e stilo para aplicar na coluna 
 					function statusAluno($media, $faltas){
 						if ($faltas >= 75) {
 							if ($media >= 5) {
@@ -154,12 +161,13 @@
 						}
 					}
 
-					$resultFaltas = (int)calculaFalta($faltas);
+					$resultFaltas = (int)calculaFalta($faltas); // Chama e recebe a função calculaFalta
 
-					$resultMedia = calculaMedia($p1, $ma1, $mb1, $p2, $ma2, $mb2);
+					$resultMedia = calculaMedia($p1, $ma1, $mb1, $p2, $ma2, $mb2); // Chama e recebe a função calculaMedia
 
-					$resultStatus = statusAluno($resultMedia['media'], $resultFaltas);	
+					$resultStatus = statusAluno($resultMedia['media'], $resultFaltas);	// Chama a recebe a função statusAluno
 					
+					// Inserir os resultados no array 'alunos'
 					array_push($alunos, [
 						"aluno" => (int)$aluno, 
 						"faltas" => (int)$faltas, 
@@ -171,7 +179,7 @@
 						]
 					);					
 				}
-				$_SESSION['bd'] = $alunos;
+				$_SESSION['bd'] = $alunos; // Variável de sessão 'bd' recebe array 'alunos'
 			?>
 			<div class="col-md-8">
 				<table class="table table-hover">
@@ -188,11 +196,12 @@
 					</thead>
 					<tbody>
 						<?php
+							// Preenhimento da Tabela
 							foreach ($alunos as $key => $value) {
 								?>
 								<tr>
-									<td>										
-										<a class="btn btn-danger" id="btn-remover" href="index.php?remove=<?php echo $key; ?>"><ion-icon name="trash"></ion-icon></a>								
+									<td>									
+										<a class="btn btn-danger" id="btn-remover" href="index.php?remove=<?php echo $key; ?>"><ion-icon name="trash"></ion-icon></a>					
 									</td>
 									<td>
 									<?php
