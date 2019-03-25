@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+	<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 	<meta charset="utf-8">
@@ -79,7 +79,8 @@
 				</div>
 			</div>
 			<?php
-	
+				session_start();
+
 				$aluno = isset($_GET['nome_aluno']) ? $_GET['nome_aluno'] : NULL;
 				$p1 = isset($_GET['p1']) ? $_GET['p1'] : NULL;
 				$ma1 = isset($_GET['ma1']) ? $_GET['ma1'] : NULL;
@@ -89,6 +90,10 @@
 				$mb2 = isset($_GET['mb2']) ? $_GET['mb2'] : NULL;
 				$faltas = isset($_GET['faltas']) ? $_GET['faltas'] : NULL;
 				$alunos = array();
+
+				if (isset($_SESSION['bd'])) {					
+					$alunos = $_SESSION['bd'];
+				}
 
 				if ($aluno != NULL) {					
 					function calculaFalta($faltas) {
@@ -154,10 +159,12 @@
 						"media" => $resultMedia['media']
 						]
 					);
+
+					$_SESSION['bd'] = $alunos;
 				}
 			?>
-			<div class="col-md-10">
-				<table class="table">
+			<div class="col-md-8">
+				<table class="table table-hover">
 					<thead>
 						<tr>
 							<th>Aluno</th>
@@ -165,7 +172,7 @@
 							<th>Nota2</th>
 							<th>Média</th>
 							<th>Faltas</th>
-							<th>Status</th>
+							<th class="text-center">Status</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -198,7 +205,7 @@
 									echo $value['faltas'];
 									?>
 									</td>
-									<td class="<?php echo $value['estilo'];?>">
+									<td class="<?php echo $value['estilo'];?> text-center">
 									<?php
 									echo $value['status'];
 									?>
