@@ -19,3 +19,9 @@ table {
 table{
 	background-color: white;
 }
+a#btn-remover {
+	height: 30px;
+	color: white;
+	padding-top: 3px;
+	font-weight: bold;
+}

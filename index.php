@@ -20,7 +20,7 @@
 						<div class="card-body">
 							<div class="row">
 								<div class="col-md-6">
-									<input type="text" name="nome_aluno" class="form-control" placeholder="Nome Aluno" required="">
+									<input type="text" name="nome_aluno" class="form-control" placeholder="RA Aluno" required="">
 								</div>			
 							</div>
 							<div class="row">
@@ -31,29 +31,29 @@
 							<div class="row">
 								<div class="col-md-4">
 									<label>P1</label>
-									<input type="number" name="p1" class="form-control" placeholder="Nota P1" required="">
+									<input type="number" name="p1" class="form-control" placeholder="Nota P1" required="" max="10" min="0">
 								</div>
 								<div class="col-md-4">
 									<label>Ma1</label>
-									<input type="number" name="ma1" class="form-control" placeholder="Nota Ma1" required="">
+									<input type="number" name="ma1" class="form-control" placeholder="Nota Ma1" required="" max="10" min="0">
 								</div>
 								<div class="col-md-4">
 									<label>Mb1</label>
-									<input type="number" name="mb1" class="form-control" placeholder="Nota Mb1" required="">
+									<input type="number" name="mb1" class="form-control" placeholder="Nota Mb1" required="" max="10" min="0">
 								</div>
 							</div>
 							<div class="row">
 								<div class="col-md-4">
 									<label>P2</label>
-									<input type="number" name="p2" class="form-control" placeholder="Nota P2" required="">
+									<input type="number" name="p2" class="form-control" placeholder="Nota P2" required="" max="10" min="0">
 								</div>
 								<div class="col-md-4">
 									<label>Ma2</label>
-									<input type="number" name="ma2" class="form-control" placeholder="Nota Ma2" required="">
+									<input type="number" name="ma2" class="form-control" placeholder="Nota Ma2" required="" max="10" min="0">
 								</div>
 								<div class="col-md-4">
 									<label>Mb2</label>
-									<input type="number" name="mb2" class="form-control" placeholder="Nota Mb2" required="">
+									<input type="number" name="mb2" class="form-control" placeholder="Nota Mb2" required="" max="10" min="0">
 								</div>
 							</div>
 							<div class="row">
@@ -79,8 +79,8 @@
 				</div>
 			</div>
 			<?php
-				session_start();
-
+				session_start();				
+				//session_destroy();
 				$aluno = isset($_GET['nome_aluno']) ? $_GET['nome_aluno'] : NULL;
 				$p1 = isset($_GET['p1']) ? $_GET['p1'] : NULL;
 				$ma1 = isset($_GET['ma1']) ? $_GET['ma1'] : NULL;
@@ -95,10 +95,21 @@
 					$alunos = $_SESSION['bd'];
 				}
 
+				if (isset($_GET['remove'])) {
+					$aux = array();
+					foreach ($alunos as $key => $value) {						
+						if ($key != $_GET['remove']) {
+							array_push($aux, $alunos[$key]);
+						}
+					}
+					$alunos = $aux;
+					header("Location: index.php");
+				}
+
 				if ($aluno != NULL) {					
 					function calculaFalta($faltas) {
-						$result = ($faltas*100)/76;					
-						return 100 - $result;
+						$result = ($faltas*100)/79;					
+						return round(100 - $result, 0);
 					}				
 
 					function calculaMedia($p1, $ma1, $mb1, $p2, $ma2, $mb2){
@@ -150,24 +161,24 @@
 					$resultStatus = statusAluno($resultMedia['media'], $resultFaltas);	
 					
 					array_push($alunos, [
-						"aluno" => $aluno, 
-						"faltas" => $faltas, 
+						"aluno" => (int)$aluno, 
+						"faltas" => (int)$faltas, 
 						"status" => $resultStatus['status'], 
 						"estilo" => $resultStatus['estilo'], 
 						"nota1" => $resultMedia['nota1'], 
 						"nota2" => $resultMedia['nota2'], 
 						"media" => $resultMedia['media']
 						]
-					);
-
-					$_SESSION['bd'] = $alunos;
+					);					
 				}
+				$_SESSION['bd'] = $alunos;
 			?>
 			<div class="col-md-8">
 				<table class="table table-hover">
 					<thead>
 						<tr>
-							<th>Aluno</th>
+							<th></th>
+							<th>RA</th>
 							<th>Nota1</th>
 							<th>Nota2</th>
 							<th>Média</th>
@@ -180,6 +191,9 @@
 							foreach ($alunos as $key => $value) {
 								?>
 								<tr>
+									<td>										
+										<a class="btn btn-danger" id="btn-remover" href="index.php?remove=<?php echo $key; ?>"><ion-icon name="trash"></ion-icon></a>								
+									</td>
 									<td>
 									<?php
 									echo $value['aluno'];
@@ -222,5 +236,6 @@
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/ionicons@4.5.5/dist/ionicons.js"></script>
 </body>
 </html>
