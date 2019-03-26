@@ -16,11 +16,11 @@
 					<div class="card-header bg-info">
 						<h3>Inserir</h3>
 					</div>
-					<form >
+					<form method="POST">
 						<div class="card-body">
 							<div class="row">
 								<div class="col-md-6">
-									<input type="text" name="nome_aluno" class="form-control" placeholder="RA Aluno" required="">
+									<input type="text" name="aluno" class="form-control" placeholder="RA Aluno" required="">
 								</div>			
 							</div>
 							<div class="row">
@@ -82,15 +82,21 @@
 				// Inicia sessão do navegador
 				session_start(); 
 
+				// Elimina variável de sessão 
+				if (isset($_GET['reset'])? $_GET['reset'] : false) {
+					session_destroy();
+					header("Location: index.php");
+				}
+
 				// Verifica se foi passado os valores via GET
-				$aluno = isset($_GET['nome_aluno']) ? $_GET['nome_aluno'] : NULL;
-				$p1 = isset($_GET['p1']) ? $_GET['p1'] : NULL;
-				$ma1 = isset($_GET['ma1']) ? $_GET['ma1'] : NULL;
-				$mb1 = isset($_GET['mb1']) ? $_GET['mb1'] : NULL;
-				$p2 = isset($_GET['p2']) ? $_GET['p2'] : NULL;
-				$ma2 = isset($_GET['ma2']) ? $_GET['ma2'] : NULL;
-				$mb2 = isset($_GET['mb2']) ? $_GET['mb2'] : NULL;
-				$faltas = isset($_GET['faltas']) ? $_GET['faltas'] : NULL;
+				$aluno = isset($_POST['aluno']) ? (int)$_POST['aluno'] : NULL;
+				$p1 = isset($_POST['p1']) ? $_POST['p1'] : NULL;
+				$ma1 = isset($_POST['ma1']) ? $_POST['ma1'] : NULL;
+				$mb1 = isset($_POST['mb1']) ? $_POST['mb1'] : NULL;
+				$p2 = isset($_POST['p2']) ? $_POST['p2'] : NULL;
+				$ma2 = isset($_POST['ma2']) ? $_POST['ma2'] : NULL;
+				$mb2 = isset($_POST['mb2']) ? $_POST['mb2'] : NULL;
+				$faltas = isset($_POST['faltas']) ? $_POST['faltas'] : NULL;				
 
 				// Cria array para armazenar os registros inseridos
 				$alunos = array();
@@ -109,10 +115,18 @@
 						}
 					}
 					$alunos = $aux;// Carrega o array 'alunos'
-					header("Location: index.php"); // Carrega página index.php
+					header("Location: index.php"); // Carrega página index.php para limpar passagens GET
 				}
 
 				if ($aluno != NULL) { // Verifica se a variável 'aluno' tem conteúdo
+
+					// Para cada registro do array "alunos" verifica se já está inserido o RA
+					foreach ($alunos as $key => $value) { 						
+						if ($aluno === $value['aluno']) {
+							header("Location: index.php");
+							exit;
+						}
+					}
 					// Função para calcular a % de falta - retorna um inteiro
 					function calculaFalta($faltas) {
 						$result = ($faltas*100)/79;					
@@ -178,8 +192,10 @@
 						"media" => $resultMedia['media']
 						]
 					);					
-				}
+				}				
 				$_SESSION['bd'] = $alunos; // Variável de sessão 'bd' recebe array 'alunos'
+				//unset($_POST[]);
+				//$aluno = NULL; // reseta variável 'aluno' para não repetir o insert se recarregar a página
 			?>
 			<div class="col-md-8">
 				<table class="table table-hover">
@@ -187,8 +203,8 @@
 						<tr>
 							<th></th>
 							<th>RA</th>
-							<th>Nota1</th>
-							<th>Nota2</th>
+							<th>Nota 1</th>
+							<th>Nota 2</th>
 							<th>Média</th>
 							<th>Faltas</th>
 							<th class="text-center">Status</th>
@@ -239,6 +255,8 @@
 						?>
 					</tbody>
 				</table>
+				<hr>
+				<a href="index.php?reset=true" class="btn btn-warning">Reiniciar</a>
 			</div>
 		</div>
 	</div>
