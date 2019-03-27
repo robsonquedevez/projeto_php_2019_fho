@@ -16,11 +16,11 @@
 					<div class="card-header bg-info">
 						<h3>Inserir</h3>
 					</div>
-					<form >
+					<form method="POST">
 						<div class="card-body">
 							<div class="row">
 								<div class="col-md-6">
-									<input type="text" name="nome_aluno" class="form-control" placeholder="RA Aluno" required="">
+									<input type="text" name="aluno" class="form-control" placeholder="RA Aluno" required="" autofocus="" tabindex="1">
 								</div>			
 							</div>
 							<div class="row">
@@ -31,29 +31,29 @@
 							<div class="row">
 								<div class="col-md-4">
 									<label>P1</label>
-									<input type="number" name="p1" class="form-control" placeholder="Nota P1" required="" max="10" min="0">
+									<input type="number" name="p1" class="form-control" placeholder="Nota P1" required="" max="10" min="0" tabindex="2">
 								</div>
 								<div class="col-md-4">
 									<label>Ma1</label>
-									<input type="number" name="ma1" class="form-control" placeholder="Nota Ma1" required="" max="10" min="0">
+									<input type="number" name="ma1" class="form-control" placeholder="Nota Ma1" required="" max="10" min="0" tabindex="3">
 								</div>
 								<div class="col-md-4">
 									<label>Mb1</label>
-									<input type="number" name="mb1" class="form-control" placeholder="Nota Mb1" required="" max="10" min="0">
+									<input type="number" name="mb1" class="form-control" placeholder="Nota Mb1" required="" max="10" min="0" tabindex="4">
 								</div>
 							</div>
 							<div class="row">
 								<div class="col-md-4">
 									<label>P2</label>
-									<input type="number" name="p2" class="form-control" placeholder="Nota P2" required="" max="10" min="0">
+									<input type="number" name="p2" class="form-control" placeholder="Nota P2" required="" max="10" min="0" tabindex="5">
 								</div>
 								<div class="col-md-4">
 									<label>Ma2</label>
-									<input type="number" name="ma2" class="form-control" placeholder="Nota Ma2" required="" max="10" min="0">
+									<input type="number" name="ma2" class="form-control" placeholder="Nota Ma2" required="" max="10" min="0" tabindex="6">
 								</div>
 								<div class="col-md-4">
 									<label>Mb2</label>
-									<input type="number" name="mb2" class="form-control" placeholder="Nota Mb2" required="" max="10" min="0">
+									<input type="number" name="mb2" class="form-control" placeholder="Nota Mb2" required="" max="10" min="0" tabindex="7">
 								</div>
 							</div>
 							<div class="row">
@@ -66,14 +66,19 @@
 									<label id="faltas">Faltas</label>									
 								</div>
 								<div class="col-md-4">
-									<input type="number" name="faltas" class="form-control" required="">
+									<input type="number" name="faltas" class="form-control" required="" tabindex="8">
 								</div>
-								
+								<div class="col-md-2">
+									<label id="qtd_aulas">Qtd Aulas</label>									
+								</div>
+								<div class="col-md-4">
+									<input type="number" name="qtd_aulas" class="form-control" required="" min="2" tabindex="9">
+								</div>								
 							</div>						
 						</div>
 						<div class="card-footer">
 							<button class="btn btn-danger" type="reset">Limpar</button>
-							<button class="btn btn-success" type="submit">Salvar</button>
+							<button class="btn btn-success" type="submit" tabindex="10">Salvar</button>
 						</div>
 					</form>					
 				</div>
@@ -82,15 +87,22 @@
 				// Inicia sessão do navegador
 				session_start(); 
 
+				// Elimina variável de sessão 
+				if (isset($_GET['reset'])? $_GET['reset'] : false) {
+					session_destroy();
+					header("Location: index.php");
+				}
+
 				// Verifica se foi passado os valores via GET
-				$aluno = isset($_GET['nome_aluno']) ? $_GET['nome_aluno'] : NULL;
-				$p1 = isset($_GET['p1']) ? $_GET['p1'] : NULL;
-				$ma1 = isset($_GET['ma1']) ? $_GET['ma1'] : NULL;
-				$mb1 = isset($_GET['mb1']) ? $_GET['mb1'] : NULL;
-				$p2 = isset($_GET['p2']) ? $_GET['p2'] : NULL;
-				$ma2 = isset($_GET['ma2']) ? $_GET['ma2'] : NULL;
-				$mb2 = isset($_GET['mb2']) ? $_GET['mb2'] : NULL;
-				$faltas = isset($_GET['faltas']) ? $_GET['faltas'] : NULL;
+				$aluno = isset($_POST['aluno']) ? (int)$_POST['aluno'] : NULL;
+				$p1 = isset($_POST['p1']) ? $_POST['p1'] : NULL;
+				$ma1 = isset($_POST['ma1']) ? $_POST['ma1'] : NULL;
+				$mb1 = isset($_POST['mb1']) ? $_POST['mb1'] : NULL;
+				$p2 = isset($_POST['p2']) ? $_POST['p2'] : NULL;
+				$ma2 = isset($_POST['ma2']) ? $_POST['ma2'] : NULL;
+				$mb2 = isset($_POST['mb2']) ? $_POST['mb2'] : NULL;
+				$faltas = isset($_POST['faltas']) ? $_POST['faltas'] : NULL;
+				$qtdAulas = isset($_POST['qtd_aulas']) ? $_POST['qtd_aulas'] : NULL;
 
 				// Cria array para armazenar os registros inseridos
 				$alunos = array();
@@ -109,13 +121,21 @@
 						}
 					}
 					$alunos = $aux;// Carrega o array 'alunos'
-					header("Location: index.php"); // Carrega página index.php
+					header("Location: index.php"); // Carrega página index.php para limpar passagens GET
 				}
 
 				if ($aluno != NULL) { // Verifica se a variável 'aluno' tem conteúdo
+
+					// Para cada registro do array "alunos" verifica se já está inserido o RA
+					foreach ($alunos as $key => $value) { 						
+						if ($aluno === $value['aluno']) {
+							header("Location: index.php");
+							exit;
+						}
+					}
 					// Função para calcular a % de falta - retorna um inteiro
-					function calculaFalta($faltas) {
-						$result = ($faltas*100)/79;					
+					function calculaFalta($faltas, $qtdAulas) {
+						$result = ($faltas*100)/$qtdAulas;					
 						return round(100 - $result, 0);
 					}				
 					// Função para calcular a médio - retorna um array com a nota 1, nota 2 e média
@@ -161,7 +181,7 @@
 						}
 					}
 
-					$resultFaltas = (int)calculaFalta($faltas); // Chama e recebe a função calculaFalta
+					$resultFaltas = (int)calculaFalta($faltas, $qtdAulas); // Chama e recebe a função calculaFalta
 
 					$resultMedia = calculaMedia($p1, $ma1, $mb1, $p2, $ma2, $mb2); // Chama e recebe a função calculaMedia
 
@@ -178,8 +198,10 @@
 						"media" => $resultMedia['media']
 						]
 					);					
-				}
+				}				
 				$_SESSION['bd'] = $alunos; // Variável de sessão 'bd' recebe array 'alunos'
+				//unset($_POST[]);
+				//$aluno = NULL; // reseta variável 'aluno' para não repetir o insert se recarregar a página
 			?>
 			<div class="col-md-8">
 				<table class="table table-hover">
@@ -187,8 +209,8 @@
 						<tr>
 							<th></th>
 							<th>RA</th>
-							<th>Nota1</th>
-							<th>Nota2</th>
+							<th>Nota 1</th>
+							<th>Nota 2</th>
 							<th>Média</th>
 							<th>Faltas</th>
 							<th class="text-center">Status</th>
@@ -239,6 +261,8 @@
 						?>
 					</tbody>
 				</table>
+				<hr>
+				<a href="index.php?reset=true" class="btn btn-warning">Reiniciar</a>
 			</div>
 		</div>
 	</div>

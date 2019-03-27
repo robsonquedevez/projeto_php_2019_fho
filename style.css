@@ -25,3 +25,6 @@ a#btn-remover {
 	padding-top: 3px;
 	font-weight: bold;
 }
+label#qtd_aulas {
+	font-size: 12pt;
+}
